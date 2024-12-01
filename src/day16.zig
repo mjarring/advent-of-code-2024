@@ -9,10 +9,9 @@ const util = @import("util.zig");
 const gpa = util.gpa;
 
 const data = @embedFile("data/day16.txt");
+const test_data = @embedFile("data/day16_test.txt");
 
-pub fn main() !void {
-    
-}
+pub fn main() !void {}
 
 // Useful stdlib functions
 const tokenizeAny = std.mem.tokenizeAny;
