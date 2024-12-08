@@ -1,25 +1,28 @@
 const std = @import("std");
-const Allocator = std.mem.Allocator;
-const List = std.ArrayList;
-const Map = std.AutoHashMap;
-const StrMap = std.StringHashMap;
-const BitSet = std.DynamicBitSet;
 
-const util = @import("util.zig");
-const gpa = util.gpa;
+const tokenizeAny = std.mem.tokenizeAny;
+const ArrayList = std.ArrayList;
+const assert = std.debug.assert;
+const parseInt = std.fmt.parseInt;
+const sort = std.mem.sort;
 
 const data = @embedFile("data/day01.txt");
 const test_data = @embedFile("data/day01_test.txt");
 
 pub fn main() !void {
-    var left_list = List(i32).init(std.heap.page_allocator);
+    var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
+    defer arena.deinit();
+
+    const allocator = arena.allocator();
+
+    var left_list = ArrayList(i32).init(allocator);
     defer left_list.deinit();
-    var right_list = List(i32).init(std.heap.page_allocator);
+    var right_list = ArrayList(i32).init(allocator);
     defer right_list.deinit();
 
     try readListsSorted(&left_list, &right_list, data);
 
-    var diffs = List(u32).init(std.heap.page_allocator);
+    var diffs = ArrayList(u32).init(allocator);
     defer diffs.deinit();
     try computeDiffs(left_list.items, right_list.items, &diffs);
 
@@ -32,7 +35,7 @@ pub fn main() !void {
     try stdout.print("Diff Sum: {}\n", .{diff_sum});
 }
 
-pub fn readListsSorted(left_list: *List(i32), right_list: *List(i32), buffer: []const u8) !void {
+pub fn readListsSorted(left_list: *ArrayList(i32), right_list: *ArrayList(i32), buffer: []const u8) !void {
     var line_iterator = tokenizeAny(u8, buffer, "\n");
     while (line_iterator.next()) |line| {
         var word_iterator = tokenizeAny(u8, line, " ");
@@ -50,20 +53,20 @@ pub fn readListsSorted(left_list: *List(i32), right_list: *List(i32), buffer: []
         }
     }
 
-    std.mem.sort(i32, left_list.items, {}, comptime std.sort.asc(i32));
-    std.mem.sort(i32, right_list.items, {}, comptime std.sort.asc(i32));
+    sort(i32, left_list.items, {}, comptime std.sort.asc(i32));
+    sort(i32, right_list.items, {}, comptime std.sort.asc(i32));
 }
 
-fn computeDiffs(left: []i32, right: []i32, diffs: *List(u32)) !void {
+fn computeDiffs(left: []i32, right: []i32, diffs: *ArrayList(u32)) !void {
     for (left, right) |l, r| {
         try diffs.append(@abs(l - r));
     }
 }
 
 test "day 01" {
-    var left = List(i32).init(std.testing.allocator);
+    var left = ArrayList(i32).init(std.testing.allocator);
     defer left.deinit();
-    var right = List(i32).init(std.testing.allocator);
+    var right = ArrayList(i32).init(std.testing.allocator);
     defer right.deinit();
 
     try readListsSorted(&left, &right, test_data);
@@ -77,7 +80,7 @@ test "day 01" {
         try std.testing.expectEqual(e, a);
     }
 
-    var diffs = List(u32).init(std.testing.allocator);
+    var diffs = ArrayList(u32).init(std.testing.allocator);
     defer diffs.deinit();
     try computeDiffs(left.items, right.items, &diffs);
     const diffs_ex = [_]u32{ 2, 1, 0, 1, 2, 5 };
@@ -91,34 +94,3 @@ test "day 01" {
     }
     try std.testing.expectEqual(11, diff_sum);
 }
-
-// Useful stdlib functions=
-const tokenizeAny = std.mem.tokenizeAny;
-const tokenizeSeq = std.mem.tokenizeSequence;
-const tokenizeSca = std.mem.tokenizeScalar;
-const splitAny = std.mem.splitAny;
-const splitSeq = std.mem.splitSequence;
-const splitSca = std.mem.splitScalar;
-const indexOf = std.mem.indexOfScalar;
-const indexOfAny = std.mem.indexOfAny;
-const indexOfStr = std.mem.indexOfPosLinear;
-const lastIndexOf = std.mem.lastIndexOfScalar;
-const lastIndexOfAny = std.mem.lastIndexOfAny;
-const lastIndexOfStr = std.mem.lastIndexOfLinear;
-const trim = std.mem.trim;
-const sliceMin = std.mem.min;
-const sliceMax = std.mem.max;
-
-const parseInt = std.fmt.parseInt;
-const parseFloat = std.fmt.parseFloat;
-
-const print = std.debug.print;
-const assert = std.debug.assert;
-
-const sort = std.sort.block;
-const asc = std.sort.asc;
-const desc = std.sort.desc;
-
-// Generated from template/template.zig.
-// Run `zig build generate` to update.
-// Only unmodified days will be updated.
