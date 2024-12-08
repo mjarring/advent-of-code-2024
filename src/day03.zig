@@ -1,7 +1,5 @@
 const std = @import("std");
 
-const util = @import("util.zig");
-
 const data = @embedFile("data/day03.txt");
 const test_data = @embedFile("data/day03_test.txt");
 

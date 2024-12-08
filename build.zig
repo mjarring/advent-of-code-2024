@@ -89,18 +89,6 @@ pub fn build(b: *Build) void {
         run_all.dependOn(&run_cmd.step);
     }
 
-    // Set up tests for util.zig
-    {
-        const test_util = b.step("test_util", "Run tests in util.zig");
-        const test_cmd = b.addTest(.{
-            .root_source_file = b.path("src/util.zig"),
-            .target = target,
-            .optimize = mode,
-        });
-        linkObject(b, test_cmd);
-        test_util.dependOn(&test_cmd.step);
-    }
-
     // Set up all tests contained in test_all.zig
     const test_all = b.step("test", "Run all tests");
     const all_tests = b.addTest(.{
