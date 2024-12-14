@@ -4,7 +4,7 @@ const data = @embedFile("data/day02.txt");
 const test_data = @embedFile("data/day02_test.txt");
 
 const Report = struct {
-    levels: []u8,
+    levels: []const u8,
     fn isSafe(self: *const Report) bool {
         return self.adjacentInRange() and (self.allAscending() or self.allDescending());
     }
